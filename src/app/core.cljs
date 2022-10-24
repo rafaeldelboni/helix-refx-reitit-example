@@ -6,8 +6,42 @@
             [reitit.core :as r]
             [reitit.coercion.spec :as rss]
             [reitit.frontend :as rf]
-            ;[reitit.frontend.controllers :as rfc]
-            [reitit.frontend.easy :as rfe]))
+            [reitit.frontend.controllers :as rfc]
+            [reitit.frontend.easy :as rfe]
+            [refx.alpha :as refx]))
+
+;;; Effects ;;;
+
+;; Triggering navigation from events.
+
+(refx/reg-fx :push-state
+             (fn [route]
+               (apply rfe/push-state route)))
+
+;;; Events ;;;
+
+(refx/reg-event-db ::initialize-db
+                   (fn [db _]
+                     (if db
+                       db
+                       {:current-route nil})))
+
+(refx/reg-event-fx ::push-state
+                   (fn [_ [_ & route]]
+                     {:push-state route}))
+
+(refx/reg-event-db ::navigated
+                   (fn [db [_ new-match]]
+                     (let [old-match   (:current-route db)
+                           controllers (rfc/apply-controllers (:controllers old-match) new-match)]
+                       (js/console.log "aaaaaaaa")
+                       (assoc db :current-route (assoc new-match :controllers controllers)))))
+
+;;; Subscriptions ;;;
+
+(refx/reg-sub ::current-route
+              (fn [db]
+                (:current-route db)))
 
 ;;; Views ;;;
 
@@ -16,8 +50,7 @@
    (d/h1 "This is home page")
    (d/button
     ;; Dispatch navigate event that triggers a (side)effect.
-    ;{:on-click #(re-frame/dispatch [::push-state ::sub-page2])}
-    {:on-click #(js/console.log [::push-state ::sub-page2])}
+    {:on-click #(refx/dispatch [::push-state ::sub-page2])}
     "Go to sub-page 2")))
 
 (defnc sub-page1 []
@@ -47,7 +80,7 @@
      :link-text "Home"
      :controllers
      [{;; Do whatever initialization needed for home page
-       ;; I.e (re-frame/dispatch [::events/load-something-with-ajax])
+       ;; I.e (refx/dispatch [::events/load-something-with-ajax])
        :start (fn [& _params] (js/console.log "Entering home page"))
        ;; Teardown can be done here.
        :stop  (fn [& _params] (js/console.log "Leaving home page"))}]}]
@@ -68,8 +101,7 @@
 
 (defn on-navigate [new-match]
   (when new-match
-    ;(re-frame/dispatch [::navigated new-match])))
-    (js/console.log [::navigated new-match])))
+    (refx/dispatch [::navigated new-match])))
 
 (def router
   (rf/router
@@ -95,8 +127,8 @@
            (d/a {:href (href route-name)} text)))))
 
 (defnc router-component [{:keys [router]}]
-  ;(let [current-route @(re-frame/subscribe [::current-route])]
-  (let [current-route {:data {:view home-page}}]
+  (let [current-route (refx/use-sub [::current-route])]
+    (js/console.log "router-component" current-route)
     (d/div
      ($ nav {:router router :current-route current-route})
      (when current-route
@@ -112,6 +144,8 @@
     (println "dev mode")))
 
 (defn ^:export init []
+  (refx/clear-subscription-cache!)
+  (refx/dispatch-sync [::initialize-db])
   (dev-setup)
   (init-routes!)
   (doto (rdom/createRoot (js/document.getElementById "app"))
