@@ -1,0 +1,7 @@
+;; shadow-cljs configuration
+{:deps     {:aliases [:dev]}
+ :dev-http {8000 "public"}
+ :builds   {:app {:target :browser
+                  :modules {:core {:init-fn app.core/init}}
+                  :devtools {:reload-strategy :full
+                             :preloads [app.dev]}}}}
