@@ -3,13 +3,13 @@ Rewrite of [reitit.frontend-re-frame](https://github.com/metosin/reitit/blob/mas
 
 ## Watch Run
 ```bash
-npx run watch
+npm run watch
 ```
 The app will be hosted locally on http://localhost:8080
 
 ## Release
 ```bash
-npx run release
+npm run release
 ```
 
 ## Demo 
