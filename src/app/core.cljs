@@ -34,7 +34,6 @@
                    (fn [db [_ new-match]]
                      (let [old-match   (:current-route db)
                            controllers (rfc/apply-controllers (:controllers old-match) new-match)]
-                       (js/console.log "aaaaaaaa")
                        (assoc db :current-route (assoc new-match :controllers controllers)))))
 
 ;;; Subscriptions ;;;
@@ -128,7 +127,6 @@
 
 (defnc router-component [{:keys [router]}]
   (let [current-route (refx/use-sub [::current-route])]
-    (js/console.log "router-component" current-route)
     (d/div
      ($ nav {:router router :current-route current-route})
      (when current-route
@@ -149,5 +147,4 @@
   (dev-setup)
   (init-routes!)
   (doto (rdom/createRoot (js/document.getElementById "app"))
-    (.render ($ router-component {:router router})))
-  (println "Hello Helix!"))
+    (.render ($ router-component {:router router}))))
