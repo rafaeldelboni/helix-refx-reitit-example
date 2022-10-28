@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "Rewrite of reitit.frontend-re-frame with helix and refx",
   "scripts": {
-    "watch": "shadow-cljs watch app",
-    "release": "shadow-cljs release app"
+    "watch": "shadow-cljs watch",
+    "release": "shadow-cljs release app && shadow-cljs release login"
   },
   "devDependencies": {
     "shadow-cljs": "2.20.6"

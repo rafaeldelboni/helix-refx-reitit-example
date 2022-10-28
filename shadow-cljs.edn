@@ -4,4 +4,8 @@
  :builds   {:app {:target :browser
                   :modules {:core {:init-fn app.core/init}}
                   :devtools {:reload-strategy :full
-                             :preloads [app.dev]}}}}
+                             :preloads [app.dev]}}
+            :login {:target :browser
+                    :modules {:login {:init-fn app.login/init}}
+                    :devtools {:reload-strategy :full
+                               :preloads [app.dev]}}}}
