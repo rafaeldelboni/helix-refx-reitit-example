@@ -41,10 +41,10 @@
 (refx/reg-event-fx
  ::login-done
  (fn
-   [{db :db} [_ response]]
+   [{db :db} [_ [_ response]]]
    {:db (-> db
             (assoc :loading? false)
-            (assoc :current-user {:login response}))}))
+            (assoc :current-user response))}))
 
 (refx/reg-event-db
  ::login-error
@@ -55,9 +55,9 @@
        (assoc :current-user nil))))
 
 (refx/reg-fx
- :login
- (fn [{:keys [user on-success]} _]
-   (js/setTimeout #(refx/dispatch (conj on-success user)) 250)))
+   :login
+   (fn [{:keys [user on-success]} _]
+     (js/setTimeout #(refx/dispatch (conj on-success user)) 250)))
 
 (refx/reg-event-fx
  ::login
@@ -134,7 +134,7 @@
    (d/p "This view is public.")))
 
 (defnc main-view []
-  (let [user (refx/use-sub [::current-user])
+  (let [{:keys [username] :as user} (refx/use-sub [::current-user])
         match (refx/use-sub [::current-route])
         route-data (:data match)]
     (d/div
@@ -143,11 +143,12 @@
       (d/li (d/a {:href (rfe/href ::about)} "About (public)"))
       (d/li (d/a {:href (rfe/href ::item-list)} "Item list"))
       (when user
-        (d/li (d/a {:on-click (fn [e]
+        (d/div
+          (d/li (d/a {:on-click (fn [e]
                                 (.preventDefault e)
                                 (refx/dispatch [::logout]))
                     :href "#"}
-                   "Logout"))))
+                   (str "Logout (" username ")"))))))
      ;; If user is authenticated
      ;; or if this route has been defined as public, else login view
      (if (or user (:public? route-data))
