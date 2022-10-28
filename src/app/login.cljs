@@ -143,9 +143,9 @@
       (d/li (d/a {:href (rfe/href ::about)} "About (public)"))
       (d/li (d/a {:href (rfe/href ::item-list)} "Item list"))
       (when user
-        (d/li (d/a {:on-click #(fn [e]
-                                 (.preventDefault e)
-                                 (refx/dispatch [::logout]))
+        (d/li (d/a {:on-click (fn [e]
+                                (.preventDefault e)
+                                (refx/dispatch [::logout]))
                     :href "#"}
                    "Logout"))))
      ;; If user is authenticated
