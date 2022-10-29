@@ -45,7 +45,7 @@
  (fn
    [{db :db} [_ [_ response]]]
    {:db (-> db
-            (assoc :loading? false)
+            (assoc :login-loading? false)
             (assoc :current-user response))}))
 
 (refx/reg-event-db
@@ -53,13 +53,13 @@
  (fn
    [db _]
    (-> db
-       (assoc :loading? false)
+       (assoc :login-loading? false)
        (assoc :current-user nil))))
 
 (refx/reg-fx
-   :login
-   (fn [{:keys [user on-success]} _]
-     (js/setTimeout #(refx/dispatch (conj on-success user)) 250)))
+ :login
+ (fn [{:keys [user on-success]} _]
+   (js/setTimeout #(refx/dispatch (conj on-success user)) 500)))
 
 (refx/reg-event-fx
  ::login
@@ -69,7 +69,7 @@
    {:login {:user user
             :on-success [::login-done]
             :on-failure [::login-error]}
-    :db  (assoc db :loading? true)}))
+    :db  (assoc db :login-loading? true)}))
 
 (refx/reg-event-db
  ::logout
@@ -87,6 +87,10 @@
 (refx/reg-sub ::current-route
               (fn [db]
                 (:current-route db)))
+
+(refx/reg-sub ::login-loading
+              (fn [db]
+                (:login-loading? db)))
 
 ;;; Views ;;;
 
@@ -108,10 +112,12 @@
        (d/p "Optional foo query param: " (:foo query))))))
 
 (defnc login-view []
-  (let [[state set-state] (hooks/use-state {:username "" :password ""})]
+  (let [loading? (refx/use-sub [::login-loading])
+        [state set-state] (hooks/use-state {:username "" :password ""})]
     (d/div
      (d/form
-      {:on-submit (fn [e]
+      {:disabled loading?
+       :on-submit (fn [e]
                     (.preventDefault e)
                     (when (and (:username state)
                                (:password state))
@@ -120,16 +126,21 @@
       (d/label "Username")
       (d/input
        {:value (:username state)
+        :disabled loading?
         :on-change #(set-state assoc :username (.. % -target -value))})
 
       (d/label "Password")
       (d/input
        {:value (:password state)
+        :disabled loading?
         :on-change #(set-state assoc :password (.. % -target -value))})
 
       (d/button
        {:type "submit"}
-       "Login")))))
+       "Login")
+
+      (when loading?
+        (d/p "Loading..."))))))
 
 (defnc about-page []
   (d/div
@@ -146,11 +157,11 @@
       (d/li (d/a {:href (rfe/href ::item-list)} "Item list"))
       (when user
         (d/div
-          (d/li (d/a {:on-click (fn [e]
-                                (.preventDefault e)
-                                (refx/dispatch [::logout]))
-                    :href "#"}
-                   (str "Logout (" username ")"))))))
+         (d/li (d/a {:on-click (fn [e]
+                                 (.preventDefault e)
+                                 (refx/dispatch [::logout]))
+                     :href "#"}
+                    (str "Logout (" username ")"))))))
      ;; If user is authenticated
      ;; or if this route has been defined as public, else login view
      (if (or user (:public? route-data))
