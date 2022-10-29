@@ -1,10 +1,12 @@
 (ns app.login
   (:require ["react-dom/client" :as rdom]
             [app.lib :refer [defnc]]
+            [clojure.pprint :refer [pprint]]
             [helix.core :refer [$]]
             [helix.dom :as d]
             [helix.hooks :as hooks]
             [refx.alpha :as refx]
+            [refx.db :as db]
             [reitit.coercion.schema :as rsc]
             [reitit.frontend :as rf]
             [reitit.frontend.controllers :as rfc]
@@ -155,7 +157,7 @@
        (when-let [view (:view route-data)]
          ($ view {:match match}))
        ($ login-view))
-     (d/pre (with-out-str (str {:user user :match match}))))))
+     (d/pre (with-out-str (pprint @db/app-db))))))
 
 ;;; Routes ;;;
 
