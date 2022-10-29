@@ -9,8 +9,8 @@ npm run watch app
 npm run watch login
 ```
 The app will be hosted locally on: 
-- http://localhost:8080 for the base example
-- http://localhost:8080/login.html for the login example
+- http://localhost:8000 for the base example
+- http://localhost:8000/login.html for the login example
 
 ## Release
 ```bash
