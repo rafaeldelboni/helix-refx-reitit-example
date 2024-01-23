@@ -116,7 +116,7 @@
    ; to not use this on servers you need special rules
    ; to redirect 404 to index.html configuration
    ; check ./nginx folder for an working docker example
-   {:use-fragment false}))
+   {:use-fragment true}))
 
 (defnc nav [{:keys [router current-route]}]
   (d/ul
