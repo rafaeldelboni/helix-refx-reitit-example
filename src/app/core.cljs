@@ -112,7 +112,11 @@
   (rfe/start!
    router
    on-navigate
-   {:use-fragment true}))
+   ; use # fragment on route
+   ; to not use this on servers you need special rules
+   ; to redirect 404 to index.html configuration
+   ; check ./nginx folder for an working docker example
+   {:use-fragment false}))
 
 (defnc nav [{:keys [router current-route]}]
   (d/ul
