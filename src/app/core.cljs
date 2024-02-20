@@ -60,6 +60,12 @@
   (d/div
    (d/h1 "This is sub-page 2")))
 
+(defnc sub-page3 []
+  (let [current-route (refx/use-sub [::current-route])]
+    (d/div
+     (d/h1 "This is sub-page 3")
+     (when current-route (d/h2 (str (-> current-route :path-params)))))))
+
 ;;; Routes ;;;
 
 (defn href
@@ -96,7 +102,16 @@
      :link-text "Sub-page 2"
      :controllers
      [{:start (fn [& _params] (js/console.log "Entering sub-page 2"))
-       :stop  (fn [& _params] (js/console.log "Leaving sub-page 2"))}]}]])
+       :stop  (fn [& _params] (js/console.log "Leaving sub-page 2"))}]}]
+   ["sub-page3/:sub"
+    {:name       ::sub-page3
+     :view       sub-page3
+     :link-text  "Sub-page 3"
+     :parameters {:path {:sub string?}}
+     :controllers
+     [{:parameters {:path [:sub]}
+       :start (fn [& _params] (js/console.log "Entering sub-page 3"))
+       :stop  (fn [& _params] (js/console.log "Leaving sub-page 3"))}]}]])
 
 (defn on-navigate [new-match]
   (when new-match
@@ -127,7 +142,9 @@
            (when (= route-name (-> current-route :data :name))
              "> ")
            ;; Create a normal links that user can click
-           (d/a {:href (href route-name)} text)))))
+           (if (= route-name ::sub-page3)
+             (d/a {:href (href route-name {:sub "test"})} text)
+             (d/a {:href (href route-name)} text))))))
 
 (defnc router-component [{:keys [router]}]
   (let [current-route (refx/use-sub [::current-route])]
